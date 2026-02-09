@@ -1,0 +1,26 @@
+# Git
+.git
+.gitignore
+
+# IDE / editor files
+.idea
+.vscode
+*.iml
+
+# OS junk
+.DS_Store
+Thumbs.db
+
+# Java build artifacts
+*.class
+target/
+
+# Logs
+*.log
+
+# Temporary files
+tmp/
+*.swp
+
+# Docker Compose file (not needed inside image)
+docker-compose.yml

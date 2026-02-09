@@ -1,0 +1,166 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>Reach 1000</title>
+<style>
+body{
+  font-family: Arial, sans-serif;
+  background: linear-gradient(135deg,#1e3c72,#2a5298);
+  color:#fff;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  height:100vh;
+}
+.card{
+  background:#111;
+  padding:30px;
+  border-radius:12px;
+  width:340px;
+  text-align:center;
+  box-shadow:0 0 20px rgba(0,0,0,.5);
+}
+input{
+  padding:10px;
+  width:90%;
+  border-radius:6px;
+  border:none;
+}
+button{
+  font-size:16px;
+  padding:10px 16px;
+  margin:8px 4px;
+  border:none;
+  border-radius:8px;
+  cursor:pointer;
+  background:#4caf50;
+  color:white;
+}
+button:hover{background:#66bb6a}
+#sum{
+  font-size:36px;
+  margin:15px 0;
+}
+table{
+  width:100%;
+  margin-top:10px;
+  border-collapse:collapse;
+}
+th,td{
+  padding:4px;
+  border-bottom:1px solid #333;
+}
+</style>
+</head>
+
+<body>
+<div class="card">
+
+<h2>Reach 1000</h2>
+
+<div id="nameBox">
+  <input id="name" placeholder="Your name">
+  <br>
+  <button onclick="start()">Start</button>
+  <button onclick="showScores()">Previous Players</button>
+</div>
+
+<div id="game" style="display:none">
+  <div>Sum</div>
+  <div id="sum">0</div>
+  <button onclick="roll()">Roll</button>
+</div>
+
+<div id="over" style="display:none">
+  <div id="stats"></div>
+  <button onclick="replay()">Replay</button>
+  <button onclick="showScores()">View High Scores</button>
+</div>
+
+<div id="scoreBox" style="display:none">
+  <table id="scores"></table>
+</div>
+
+</div>
+
+<script>
+let sum=0;
+let clicks=0;
+let player="";
+
+const nameBox=document.getElementById("nameBox");
+const game=document.getElementById("game");
+const over=document.getElementById("over");
+const scoreBox=document.getElementById("scoreBox");
+const stats=document.getElementById("stats");
+const scores=document.getElementById("scores");
+const sumDiv=document.getElementById("sum");
+
+function start(){
+  const nameInput=document.getElementById("name");
+  player=nameInput.value.trim();
+  if(!player) return;
+
+  sum=0;
+  clicks=0;
+  sumDiv.textContent=0;
+
+  scoreBox.style.display="none";
+  nameBox.style.display="none";
+  over.style.display="none";
+  game.style.display="block";
+}
+
+function weightedRandom(){
+  const r=Math.random();
+  if(r<0.65) return Math.floor(Math.random()*30)+1;
+  if(r<0.90) return Math.floor(Math.random()*120)+30;
+  if(r<0.98) return Math.floor(Math.random()*300)+150;
+  return Math.floor(Math.random()*500)+500;
+}
+
+function roll(){
+  const v=weightedRandom();
+  sum+=v;
+  clicks++;
+  sumDiv.textContent=sum;
+  if(sum>=1000) end();
+}
+
+function end(){
+  game.style.display="none";
+  over.style.display="block";
+
+  stats.innerHTML=player+"<br>Clicks: "+clicks;
+
+  fetch("/score",{
+    method:"POST",
+    body:player+","+clicks
+  });
+}
+
+function showScores(){
+  scoreBox.style.display="block";
+
+  fetch("/scores")
+    .then(r=>r.json())
+    .then(data=>{
+      scores.innerHTML="<tr><th>Name</th><th>Clicks</th></tr>";
+      data.forEach(s=>{
+        scores.innerHTML+=
+          "<tr><td>"+s.name+"</td><td>"+s.clicks+"</td></tr>";
+      });
+    });
+}
+
+function replay(){
+  document.getElementById("name").value="";
+  nameBox.style.display="block";
+  over.style.display="none";
+  scoreBox.style.display="none";
+}
+</script>
+
+</body>
+</html>
