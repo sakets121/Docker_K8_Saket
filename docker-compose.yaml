@@ -1,11 +1,9 @@
-version: '3'
-
 services:
   web:
-    image: myapp:v9
     build: .
+    image: myapp:v22
     ports:
-      - "9012:8000"
+      - "9012:8080"
     environment:
       DB_URL: jdbc:postgresql://db:5432/db
       DB_USER: postgres

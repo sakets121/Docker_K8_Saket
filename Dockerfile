@@ -1,7 +1,12 @@
-FROM eclipse-temurin:17-jdk-alpine
+FROM maven:3.9.9-eclipse-temurin-17 AS build
+WORKDIR /build
+COPY pom.xml .
+RUN mvn dependency:go-offline
+COPY src ./src
+RUN mvn package -DskipTests
+
+FROM eclipse-temurin:17-jre-alpine
 WORKDIR /app
-COPY Backend/App.java .
-COPY Backend/postgresql.jar .
-COPY Frontend/index.html .
-RUN javac App.java
-CMD ["java","-cp",".:postgresql.jar","App"]
+COPY --from=build /build/target/*.jar app.jar
+EXPOSE 8080
+CMD ["java","-jar","app.jar"]
